@@ -10,10 +10,10 @@ interface IFindProducts {
 }
 
 class ProductsRepository implements IProductsRepository {
-  private ormRepository: Repository<Product>;
+  private repository: Repository<Product>;
 
   constructor() {
-    this.ormRepository = getRepository(Product);
+    this.repository = getRepository(Product);
   }
 
   public async create({
@@ -21,21 +21,38 @@ class ProductsRepository implements IProductsRepository {
     price,
     quantity,
   }: ICreateProductDTO): Promise<Product> {
-    // TODO
+    const product = this.repository.create({
+      name,
+      price,
+      quantity
+    });
+
+    await this.repository.save(product);
+    return product;
   }
 
   public async findByName(name: string): Promise<Product | undefined> {
-    // TODO
+    return await this.repository.findOne({
+      where: {
+        name
+      }
+    });
   }
 
   public async findAllById(products: IFindProducts[]): Promise<Product[]> {
-    // TODO
+    const ids = products.map(product => product.id);
+
+    return await this.repository.find({
+      where: {
+        id: In(ids)
+      }
+    });
   }
 
   public async updateQuantity(
     products: IUpdateProductsQuantityDTO[],
   ): Promise<Product[]> {
-    // TODO
+    return await this.repository.save(products);
   }
 }
 
